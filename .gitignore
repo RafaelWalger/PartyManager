@@ -12,6 +12,9 @@ venv/
 # Vercel
 .vercel/
 
+# Contexto para o Claude Code (fica só no PC)
+CLAUDE.md
+
 # IDEs
 .idea/
 .vscode/
