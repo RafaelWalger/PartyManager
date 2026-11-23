@@ -1,0 +1,124 @@
+{% extends "organizador/_layout.html" %}
+{% import "fragmentos/macros.html" as m with context %}
+{% block titulo %}Ingressos{% endblock %}
+
+{% block conteudo %}
+<header class="cabecalho-pagina">
+  <div>
+    <div class="trilha"><a href="{{ url_for('organizador.painel') }}">Painel</a><span>/</span><span>Ingressos</span></div>
+    <h1>Ingressos e lista de acesso</h1>
+    <p>{{ usados }} pessoas já entraram. {{ validos }} ingressos ainda não foram usados.</p>
+  </div>
+</header>
+
+{{ m.avisos() }}
+
+<!-- Lotes -->
+<section class="solido bloco" style="margin-bottom: 16px">
+  <div class="titulo-bloco">
+    <div>
+      <h2>Lotes</h2>
+      <p>{{ lugares_em_lotes }} de {{ evento_atual.capacidade }} lugares já estão em lotes</p>
+    </div>
+  </div>
+  {% if lotes %}
+  <div class="tabela-rolagem">
+    <table class="tabela">
+      <thead><tr><th>Lote</th><th class="num">Preço</th><th>Vendidos</th><th class="num">Restam</th></tr></thead>
+      <tbody>
+        {% for l in lotes %}
+        <tr>
+          <td><strong>{{ l.nome }}</strong></td>
+          <td class="num">{{ l.preco | reais }}</td>
+          <td style="min-width: 160px">
+            <div class="tracos {{ 'tracos-erro' if l.restantes == 0 }}"
+                 style="margin-top:0;--pct:{{ pct(l.vendidos, l.quantidade) }}%"
+                 title="{{ l.vendidos }} de {{ l.quantidade }}"></div>
+          </td>
+          <td class="num">{{ 'Esgotado' if l.restantes == 0 else l.restantes }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+  <form class="campos mt" action="{{ url_for('organizador.criar_lote') }}" method="post" style="align-items: end">
+    {{ m.csrf() }}
+    <div class="campo"><label for="lote-nome">Novo lote</label><input type="text" id="lote-nome" name="nome" placeholder="VIP" required></div>
+    <div class="campo"><label for="lote-preco">Preço (R$)</label><input type="text" id="lote-preco" name="preco" inputmode="decimal" placeholder="50,00" required></div>
+    <div class="campo"><label for="lote-qtd">Quantidade</label><input type="number" id="lote-qtd" name="quantidade" min="1" placeholder="40" required></div>
+    <button type="submit" class="btn btn-primario">Criar lote</button>
+  </form>
+</section>
+
+<div class="grade-lateral">
+  <!-- Lista de acesso -->
+  <section class="solido bloco">
+    <div class="titulo-bloco">
+      <div><h2>Lista de acesso</h2><p>Quem já entrou e quem ainda falta</p></div>
+      <form class="linha" action="{{ url_for('organizador.ingressos') }}" method="get" role="search">
+        <label class="so-leitor" for="busca">Buscar participante</label>
+        <input type="search" id="busca" name="busca" value="{{ busca }}" placeholder="Nome ou código" style="min-height: 40px; width: 220px">
+      </form>
+    </div>
+    {% if ingressos %}
+    <div class="tabela-rolagem">
+      <table class="tabela">
+        <thead><tr><th>Participante</th><th class="opcional">Lote</th><th>Situação</th><th></th></tr></thead>
+        <tbody>
+          {% for i in ingressos %}
+          <tr>
+            <td><strong>{{ i.nome_participante }}</strong><br>
+              <span class="fraco mono pequeno">{{ i.qr_code }}</span></td>
+            <td class="opcional">{{ i.lote_nome }}</td>
+            <td>
+              {% if i.status == 'usado' %}<span class="tag tag-ok">Entrou às {{ i.usado_em | hora }}</span>
+              {% elif i.status == 'cancelado' %}<span class="tag tag-erro">Cancelado</span>
+              {% else %}<span class="tag">Ainda não entrou</span>{% endif %}
+            </td>
+            <td class="num"><a href="{{ url_for('organizador.ingresso', id=i.id) }}" class="link pequeno">Abrir</a></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="vazio">
+      {{ icone('ingresso') }}
+      <h3>{{ 'Nenhum ingresso emitido' if not busca else 'Ninguém encontrado' }}</h3>
+      <p>{{ 'Crie um lote e emita o primeiro ingresso no formulário ao lado.' if not busca else 'Confira o nome ou o código e tente de novo.' }}</p>
+    </div>
+    {% endif %}
+  </section>
+
+  <!-- Emitir ingresso -->
+  <section class="vidro bloco">
+    <h2 style="margin-bottom: 6px">Emitir ingresso</h2>
+    <p class="texto-2 pequeno" style="margin-bottom: 18px">Para venda na porta, cortesia ou lista. O QR Code é gerado na hora.</p>
+    {% if lotes %}
+    <form class="form" action="{{ url_for('organizador.emitir_ingresso') }}" method="post">
+      {{ m.csrf() }}
+      <div class="campo">
+        <label for="lote">Lote</label>
+        <select id="lote" name="lote_id" required>
+          {% for l in lotes %}
+          <option value="{{ l.id }}" {% if l.restantes == 0 %}disabled{% endif %}>{{ l.nome }}, {{ l.preco | reais }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="campo">
+        <label for="part-nome">Nome do participante</label>
+        <input type="text" id="part-nome" name="nome" required>
+      </div>
+      <div class="campo">
+        <label for="part-email">E-mail (opcional)</label>
+        <input type="email" id="part-email" name="email">
+      </div>
+      <button type="submit" class="btn btn-primario btn-bloco">Emitir ingresso</button>
+    </form>
+    {% else %}
+    <p class="aviso aviso-info">{{ icone('info') }}<span>Crie um lote primeiro.</span></p>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

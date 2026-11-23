@@ -1,0 +1,135 @@
+{% extends "organizador/_layout.html" %}
+{% import "fragmentos/macros.html" as m with context %}
+{% block titulo %}Equipe{% endblock %}
+
+{# Quatro caixas de permissão, usadas na lista e no formulário de novo acesso #}
+{% macro permissoes(membro=none) %}
+<div class="opcoes" role="group" aria-label="Permissões">
+  {% for campo, texto in [('perm_escanear', 'Portaria'), ('perm_pdv', 'Ponto de venda'), ('perm_caixa', 'Caixa'), ('perm_relatorios', 'Resumo')] %}
+  {% set marcado = membro[campo] if membro else campo == 'perm_pdv' %}
+  <label class="opcao"><input type="checkbox" name="{{ campo }}" value="true" {% if marcado %}checked{% endif %}><span>{{ texto }}</span></label>
+  {% endfor %}
+</div>
+{% endmacro %}
+
+{% block conteudo %}
+<header class="cabecalho-pagina">
+  <div>
+    <div class="trilha"><a href="{{ url_for('organizador.painel') }}">Painel</a><span>/</span><span>Equipe</span></div>
+    <h1>Equipe do evento</h1>
+    <p>Você cria o acesso de cada pessoa e escolhe o que ela pode fazer. Ninguém da equipe vê o painel do organizador.</p>
+  </div>
+</header>
+
+{{ m.avisos() }}
+
+<div class="grade-lateral">
+  <div class="pilha">
+    <!-- Como a equipe entra -->
+    <section class="vidro bloco">
+      <div class="linha entre">
+        <div>
+          <span class="rotulo">Código do evento para a equipe</span>
+          <div class="codigo-acesso">{{ evento_atual.codigo_acesso }}</div>
+        </div>
+        <p class="texto-2 pequeno" style="max-width: 36ch">
+          A equipe entra em <a href="{{ url_for('publico.entrar_equipe', codigo=evento_atual.codigo_acesso) }}" class="link">/equipe/entrar</a>
+          com este código, o usuário e a senha que você criar abaixo.
+        </p>
+      </div>
+    </section>
+
+    <!-- Membros -->
+    {% if membros %}
+    <div class="membros">
+      {% for mb in membros %}
+      <article class="membro solido {{ 'inativo' if not mb.ativo }}">
+        <div class="membro-topo">
+          <span class="avatar">{{ mb.nome[:1] | upper }}</span>
+          <div>
+            <strong>{{ mb.nome }}</strong>
+            <small>usuário {{ mb.usuario }}{% if mb.ponto_nome %}, fixa em {{ mb.ponto_nome }}{% endif %}</small>
+          </div>
+          <span class="tag {{ 'tag-ok' if mb.ativo else 'tag-erro' }}">{{ 'Ativo' if mb.ativo else 'Desativado' }}</span>
+        </div>
+
+        <form class="form" action="{{ url_for('organizador.permissoes', id=mb.id) }}" method="post">
+          {{ m.csrf() }}
+          {{ permissoes(mb) }}
+          <div class="linha" style="flex-wrap: nowrap">
+            <label class="so-leitor" for="ponto-{{ mb.id }}">Ponto de venda fixo</label>
+            <select id="ponto-{{ mb.id }}" name="ponto_id" style="min-height: 40px">
+              <option value="">Qualquer ponto</option>
+              {% for p in pontos %}
+              <option value="{{ p.id }}" {% if p.id == mb.ponto_id %}selected{% endif %}>{{ p.nome }}</option>
+              {% endfor %}
+            </select>
+            <button type="submit" class="btn btn-vidro btn-p">Salvar permissões</button>
+          </div>
+        </form>
+
+        <details>
+          <summary>Mais opções</summary>
+          <div class="pilha">
+            <form class="linha" action="{{ url_for('organizador.redefinir_senha', id=mb.id) }}" method="post" style="flex-wrap: nowrap">
+              {{ m.csrf() }}
+              <label class="so-leitor" for="senha-{{ mb.id }}">Nova senha</label>
+              <input type="text" id="senha-{{ mb.id }}" name="senha" placeholder="Nova senha" minlength="6" required autocomplete="off" style="min-height: 40px">
+              <button type="submit" class="btn btn-fantasma btn-p">Redefinir senha</button>
+            </form>
+            <form action="{{ url_for('organizador.alternar_membro', id=mb.id) }}" method="post"
+                  {% if mb.ativo %}data-confirmar="Desativar {{ mb.nome }}? A pessoa sai do sistema na hora."{% endif %}>
+              {{ m.csrf() }}
+              <button type="submit" class="btn btn-p {{ 'btn-perigo' if mb.ativo else 'btn-fantasma' }}">{{ 'Desativar acesso' if mb.ativo else 'Reativar acesso' }}</button>
+            </form>
+          </div>
+        </details>
+      </article>
+      {% endfor %}
+    </div>
+    {% else %}
+    <section class="solido vazio">
+      {{ icone('equipe') }}
+      <h3>Ninguém na equipe ainda</h3>
+      <p>Crie um acesso para cada pessoa que vai trabalhar na portaria, no bar ou no caixa.</p>
+    </section>
+    {% endif %}
+  </div>
+
+  <!-- Novo acesso -->
+  <section class="vidro bloco">
+    <h2 style="margin-bottom: 6px">Novo acesso</h2>
+    <p class="texto-2 pequeno" style="margin-bottom: 18px">
+      {% if plano.max_equipe is none %}Seu plano não tem limite de equipe.{% else %}Seu plano permite até {{ plano.max_equipe }} pessoas por evento.{% endif %}
+    </p>
+    <form class="form" action="{{ url_for('organizador.criar_acesso') }}" method="post">
+      {{ m.csrf() }}
+      <div class="campo"><label for="m-nome">Nome</label><input type="text" id="m-nome" name="nome" placeholder="Paula Souza" required></div>
+      <div class="campos">
+        <div class="campo">
+          <label for="m-usuario">Usuário</label>
+          <input type="text" id="m-usuario" name="usuario_equipe" placeholder="paula" pattern="[a-z0-9._\-]{3,30}"
+                 autocapitalize="none" spellcheck="false" required>
+        </div>
+        <div class="campo">
+          <label for="m-senha">Senha</label>
+          <input type="text" id="m-senha" name="senha" minlength="6" autocomplete="off" required>
+        </div>
+      </div>
+      <span class="ajuda texto-3 pequeno">Usuário com letras minúsculas, sem espaço. Senha com pelo menos 6 caracteres.</span>
+      <fieldset class="campo" style="border: 0">
+        <legend class="rotulo" style="margin-bottom: 8px">O que essa pessoa pode fazer</legend>
+        {{ permissoes() }}
+      </fieldset>
+      <div class="campo">
+        <label for="m-ponto">Ponto de venda fixo</label>
+        <select id="m-ponto" name="ponto_id">
+          <option value="">Qualquer ponto</option>
+          {% for p in pontos %}<option value="{{ p.id }}">{{ p.nome }}</option>{% endfor %}
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primario btn-bloco">Criar acesso</button>
+    </form>
+  </section>
+</div>
+{% endblock %}

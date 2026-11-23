@@ -1,0 +1,89 @@
+{% extends "equipe/_layout.html" %}
+{% import "fragmentos/macros.html" as m with context %}
+{% set titulo_barra = 'Caixa de pulseiras' %}
+{% set voltar = true %}
+{% block titulo %}Caixa{% endblock %}
+{% block main_classe %}area-estreita{% endblock %}
+
+{% block conteudo %}
+{{ m.avisos(erro=erro) }}
+
+{% if not cartao %}
+<!-- 1. Ler a pulseira (consulta o saldo) -->
+<form class="leitor vidro" action="{{ url_for('equipe.caixa') }}" method="get">
+  <div class="leitor-onda">{{ icone('pulseira') }}</div>
+  <div>
+    <h1 style="font-size: 1.5rem">Aproxime a pulseira</h1>
+    <p class="texto-2 pequeno">Pulseira nova? Faça a recarga direto abaixo que ela é ativada.</p>
+  </div>
+  <label class="so-leitor" for="uid-consulta">Código da pulseira</label>
+  <input type="text" id="uid-consulta" name="uid" class="input-g" value="{{ uid }}" placeholder="04:A2:3F:1B"
+         autocomplete="off" spellcheck="false" required autofocus>
+  <button type="button" class="btn btn-vidro btn-g btn-bloco" data-leitor-nfc data-enviar="sim" hidden>Ler com o celular</button>
+  <button type="submit" class="btn btn-vidro btn-g btn-bloco">Consultar saldo</button>
+</form>
+{% else %}
+<!-- Pulseira lida -->
+<section class="vidro bloco-g">
+  <div class="linha entre">
+    <span class="mono texto-2">{{ cartao.uid_nfc }}</span>
+    <span class="tag {{ 'tag-ok' if cartao.ativo else 'tag-erro' }}">{{ 'Ativa' if cartao.ativo else 'Bloqueada' }}</span>
+  </div>
+  <span class="rotulo">Saldo disponível</span>
+  <div class="valor-gigante">{{ cartao.saldo | reais }}</div>
+  {% if historico %}
+  <div class="separador"></div>
+  <ul class="itens">
+    {% for t in historico %}
+    <li>
+      <span>{{ t.criado_em | hora }}&nbsp;&nbsp;{{ t.tipo | tipo_transacao }}{% if t.ponto_nome %}, {{ t.ponto_nome }}{% endif %}</span>
+      <span>{{ '− ' if t.tipo == 'debito' else '+ ' }}{{ t.valor | reais }}</span>
+    </li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+  <a href="{{ url_for('equipe.caixa') }}" class="btn btn-fantasma btn-bloco mt">Ler outra pulseira</a>
+</section>
+{% endif %}
+
+<!-- 2. Recarga -->
+{% if not cartao or cartao.ativo %}
+<section class="solido bloco-g mt">
+  <h2 style="margin-bottom: 16px">Recarregar</h2>
+  <form class="form" action="{{ url_for('equipe.recarga') }}" method="post">
+    {{ m.csrf() }}
+    {% if cartao %}
+    <input type="hidden" name="uid" value="{{ cartao.uid_nfc }}">
+    {% else %}
+    <div class="campo">
+      <label for="uid">Código da pulseira</label>
+      <input type="text" id="uid" name="uid" value="{{ uid }}" placeholder="04:A2:3F:1B" autocomplete="off" spellcheck="false" required>
+    </div>
+    {% endif %}
+
+    <div class="campo">
+      <label for="valor">Valor (R$)</label>
+      <input type="text" id="valor" name="valor" class="input-g" inputmode="decimal" placeholder="50,00" required>
+      <div class="valores-rapidos mt" style="margin-top: 4px">
+        {% for v in [20, 50, 100, 200] %}
+        <button type="button" class="btn btn-fantasma btn-p" data-valor-rapido="{{ v }},00" data-alvo="valor">R$ {{ v }}</button>
+        {% endfor %}
+      </div>
+    </div>
+
+    <fieldset style="border: 0">
+      <legend class="rotulo" style="margin-bottom: 8px">Como o participante pagou</legend>
+      <div class="formas">
+        <input type="radio" id="f-pix" name="forma" value="pix" required><label for="f-pix">Pix</label>
+        <input type="radio" id="f-cartao" name="forma" value="cartao"><label for="f-cartao">Cartão</label>
+        <input type="radio" id="f-dinheiro" name="forma" value="dinheiro"><label for="f-dinheiro">Dinheiro</label>
+      </div>
+    </fieldset>
+
+    <button type="submit" class="btn btn-primario btn-g btn-bloco">Confirmar recarga</button>
+  </form>
+</section>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}<script src="/js/leitor.js"></script>{% endblock %}

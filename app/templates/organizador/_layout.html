@@ -1,0 +1,68 @@
+{#
+  Layout das páginas do organizador: menu lateral SÓLIDO + conteúdo.
+  As páginas fazem {% extends "organizador/_layout.html" %} e preenchem o bloco "conteudo".
+#}
+{% extends "base.html" %}
+{% import "fragmentos/macros.html" as m with context %}
+{% block luzes %}luzes-calmas{% endblock %}
+
+{% block corpo %}
+<div class="painel">
+  <aside class="lateral">
+    {{ m.marca(url_for('organizador.painel')) }}
+
+    {% if evento_atual %}
+    <form class="seletor-evento" action="{{ url_for('organizador.trocar_evento') }}" method="post">
+      {{ m.csrf() }}
+      <label for="evento-atual">Evento aberto</label>
+      <select id="evento-atual" name="evento_id" onchange="this.form.submit()">
+        {% for e in eventos %}
+        <option value="{{ e.id }}" {% if e.id == evento_atual.id %}selected{% endif %}>{{ e.nome }}</option>
+        {% endfor %}
+      </select>
+      <noscript><button type="submit" class="btn btn-p btn-fantasma mt">Abrir</button></noscript>
+      <div class="codigo"><span>Código da equipe</span><strong>{{ evento_atual.codigo_acesso }}</strong></div>
+    </form>
+    {% endif %}
+
+    <nav class="nav-lateral" aria-label="Menu do organizador">
+      {% for endpoint, chave, icone_nome, texto in [
+          ('organizador.painel', 'painel', 'painel', 'Painel ao vivo'),
+          ('organizador.ingressos', 'ingressos', 'ingresso', 'Ingressos'),
+          ('organizador.produtos', 'produtos', 'produto', 'Loja e produtos'),
+          ('organizador.pulseiras', 'pulseiras', 'pulseira', 'Pulseiras NFC'),
+          ('organizador.transacoes', 'transacoes', 'transacao', 'Transações'),
+          ('organizador.equipe', 'equipe', 'equipe', 'Equipe'),
+          ('-', '', '', ''),
+          ('organizador.eventos', 'eventos', 'evento', 'Meus eventos'),
+          ('organizador.conta', 'conta', 'conta', 'Conta e aparência')] %}
+        {% if endpoint == '-' %}
+        <div class="nav-separador"></div>
+        {% else %}
+        <a href="{{ url_for(endpoint) }}" {% if pagina == chave %}class="ativo" aria-current="page"{% endif %}>
+          {{ icone(icone_nome) }}{{ texto }}</a>
+        {% endif %}
+      {% endfor %}
+    </nav>
+
+    <div class="lateral-rodape">
+      <div class="perfil">
+        <span class="avatar">{{ org.nome[:1] | upper }}</span>
+        <span class="perfil-texto">
+          <strong>{{ org.nome }}</strong>
+          <small>Plano {{ plano.nome }}</small>
+        </span>
+        {{ m.alternar_modo() }}
+      </div>
+      <form action="{{ url_for('publico.sair') }}" method="post">
+        {{ m.csrf() }}
+        <button type="submit" class="btn btn-fantasma btn-bloco btn-p" data-sem-trava>{{ icone('sair') }}Sair</button>
+      </form>
+    </div>
+  </aside>
+
+  <main class="conteudo" {% block main_attrs %}{% endblock %}>
+    {% block conteudo %}{% endblock %}
+  </main>
+</div>
+{% endblock %}

@@ -1,0 +1,54 @@
+{% extends "equipe/_layout.html" %}
+{% import "fragmentos/macros.html" as m with context %}
+{% set titulo_barra = 'Portaria' %}
+{% set voltar = true %}
+{% block titulo %}Portaria{% endblock %}
+{% block main_classe %}area-estreita{% endblock %}
+
+{% block conteudo %}
+{{ m.avisos() }}
+
+<!-- Resultado da última leitura -->
+{% if leitura %}
+<div class="resultado {{ 'resultado-ok' if leitura.situacao == 'ok' else 'resultado-erro' }}" role="alert">
+  <span class="sinal">{{ '✓' if leitura.situacao == 'ok' else '✕' }}</span>
+  <div>
+    {% if leitura.situacao == 'ok' %}
+      <strong>Entrada liberada</strong>
+      <span>{{ leitura.participante }}, lote {{ leitura.lote }}</span>
+    {% elif leitura.situacao == 'usado' %}
+      <strong>Ingresso já utilizado</strong>
+      <span>{{ leitura.participante }} entrou às {{ leitura.hora_entrada }}</span>
+    {% elif leitura.situacao == 'cancelado' %}
+      <strong>Ingresso cancelado</strong>
+      <span>{{ leitura.participante }}. Encaminhe para a organização.</span>
+    {% else %}
+      <strong>Ingresso não encontrado</strong>
+      <span>O código {{ leitura.codigo }} não é deste evento.</span>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+
+<section class="leitor vidro">
+  <div class="leitor-onda">{{ icone('qr') }}</div>
+  <div>
+    <h1 style="font-size: 1.5rem">Leia o QR Code</h1>
+    <p class="texto-2">Aponte o leitor ou a câmera para o ingresso. Também dá para digitar o código.</p>
+  </div>
+  <video id="video-qr" playsinline muted hidden></video>
+  <form action="{{ url_for('equipe.validar') }}" method="post">
+    {{ m.csrf() }}
+    <label class="so-leitor" for="codigo">Código do ingresso</label>
+    <input type="text" id="codigo" name="codigo" class="input-g" placeholder="PM-XXXXXXXX"
+           autocomplete="off" autocapitalize="characters" spellcheck="false" required autofocus>
+    <button type="button" class="btn btn-vidro btn-g btn-bloco" data-leitor-qr data-video="#video-qr" hidden>Usar câmera</button>
+    <button type="submit" class="btn btn-primario btn-g btn-bloco">Validar entrada</button>
+  </form>
+</section>
+
+<p class="texto-2 mt" style="text-align: center">{{ entradas }} de {{ evento.capacidade }} pessoas já entraram</p>
+<div class="tracos" style="--pct:{{ pct(entradas, evento.capacidade) }}%"></div>
+{% endblock %}
+
+{% block scripts %}<script src="/js/leitor.js"></script>{% endblock %}

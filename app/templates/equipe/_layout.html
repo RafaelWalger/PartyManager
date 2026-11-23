@@ -1,0 +1,16 @@
+{#
+  Layout do "modo operador" da equipe: barra de vidro no topo + área central.
+  Cada página define, ANTES dos blocos:
+    {% set titulo_barra = 'Portaria' %}   {% set voltar = true %}
+#}
+{% extends "base.html" %}
+{% import "fragmentos/macros.html" as m with context %}
+
+{% block corpo %}
+<div class="operador">
+  {{ m.barra_operador(titulo_barra, voltar) }}
+  <main class="area-operador {% block main_classe %}{% endblock %}" {% block main_attrs %}{% endblock %}>
+    {% block conteudo %}{% endblock %}
+  </main>
+</div>
+{% endblock %}

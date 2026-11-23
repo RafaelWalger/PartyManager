@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+{#
+  Layout de TODAS as páginas. Cada página faz {% extends "base.html" %}
+  e preenche os blocos: titulo, luzes (classe do fundo), corpo e scripts.
+#}
+<html lang="pt-BR" data-tema="{{ tema }}" data-modo="{{ modo }}" data-servidor="{{ '1' if aparencia_no_servidor else '0' }}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="_csrf" content="{{ csrf_token() }}">
+  <meta name="theme-color" content="#08060f">
+  <title>{% block titulo %}{% endblock %} · PartyManager</title>
+  <link rel="icon" href="/img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/css/fontes.css">
+  <link rel="stylesheet" href="/css/temas.css">
+  <link rel="stylesheet" href="/css/style.css">
+  {% if not aparencia_no_servidor %}
+  <!-- Aplica a cor salva no navegador antes de desenhar a página (evita "piscar") -->
+  <script>
+    try {
+      var salvo = JSON.parse(localStorage.getItem("partymanager-aparencia"));
+      if (salvo) {
+        document.documentElement.dataset.tema = salvo.tema;
+        document.documentElement.dataset.modo = salvo.modo;
+      } else if (window.matchMedia("(prefers-color-scheme: light)").matches) {
+        document.documentElement.dataset.modo = "claro";
+      }
+    } catch (e) {}
+  </script>
+  {% endif %}
+</head>
+<body>
+<div class="luzes {% block luzes %}{% endblock %}" aria-hidden="true"><span></span><span></span><span></span></div>
+
+{% block corpo %}{% endblock %}
+
+<script src="/js/app.js"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

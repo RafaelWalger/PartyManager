@@ -1,0 +1,47 @@
+{% extends "equipe/_layout.html" %}
+{% import "fragmentos/macros.html" as m with context %}
+{% set titulo_barra = 'Lista de acesso' %}
+{% set voltar = true %}
+{% block titulo %}Lista de acesso{% endblock %}
+{% block luzes %}luzes-calmas{% endblock %}
+
+{% block conteudo %}
+<div class="linha entre" style="margin-bottom: 16px">
+  <p class="texto-2">
+    <strong class="numero" style="font-size: 1.4rem; color: var(--texto)">{{ entradas }}</strong>
+    <span> entraram, faltam {{ vendidos - entradas }}</span>
+  </p>
+  <form action="{{ url_for('equipe.lista_de_acesso') }}" method="get" role="search" style="flex: 1; max-width: 360px">
+    <label class="so-leitor" for="busca">Buscar participante</label>
+    <input type="search" id="busca" name="busca" value="{{ busca }}" placeholder="Buscar pelo nome ou código">
+  </form>
+</div>
+
+<section class="solido bloco">
+  {% if ingressos %}
+  <div class="tabela-rolagem">
+    <table class="tabela">
+      <thead><tr><th>Participante</th><th>Lote</th><th>Situação</th></tr></thead>
+      <tbody>
+        {% for i in ingressos %}
+        <tr>
+          <td><strong>{{ i.nome_participante }}</strong></td>
+          <td>{{ i.lote_nome }}</td>
+          <td>
+            {% if i.status == 'usado' %}<span class="tag tag-ok">Entrou às {{ i.usado_em | hora }}</span>
+            {% elif i.status == 'cancelado' %}<span class="tag tag-erro">Cancelado</span>
+            {% else %}<span class="tag">Pendente</span>{% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="vazio">
+    <h3>Ninguém encontrado</h3>
+    <p>Confira o nome digitado.</p>
+  </div>
+  {% endif %}
+</section>
+{% endblock %}

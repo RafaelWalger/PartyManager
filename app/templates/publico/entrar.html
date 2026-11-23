@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% import "fragmentos/macros.html" as m with context %}
+{% block titulo %}Entrar{% endblock %}
+
+{% block corpo %}
+<main class="pagina-auth">
+  <div class="auth">
+    <div class="vidro">
+      <div class="auth-topo">
+        {{ m.marca('/') }}
+        {{ m.alternar_modo() }}
+      </div>
+
+      <h1>Entre na sua conta</h1>
+      <p class="sub">Área do organizador de eventos.</p>
+
+      {% if erro or request.args.saiu %}
+      <div class="avisos">
+        {% if erro %}<p class="aviso aviso-erro" role="alert">{{ icone('alerta') }}<span>{{ erro }}</span></p>{% endif %}
+        {% if request.args.saiu %}<p class="aviso aviso-info">{{ icone('info') }}<span>Você saiu da conta.</span></p>{% endif %}
+      </div>
+      {% endif %}
+
+      <form class="form" action="{{ url_for('publico.entrar_enviar') }}" method="post">
+        {{ m.csrf() }}
+        <div class="campo">
+          <label for="email">E-mail</label>
+          <input type="email" id="email" name="email" value="{{ email or '' }}" placeholder="voce@email.com.br" autocomplete="email" required autofocus>
+        </div>
+        <div class="campo">
+          <label for="senha">Senha</label>
+          <div class="campo-senha">
+            <input type="password" id="senha" name="senha" placeholder="Sua senha" autocomplete="current-password" required>
+            <button type="button" data-ver-senha aria-label="Mostrar senha">
+              <svg class="icone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primario btn-g btn-bloco">Entrar</button>
+      </form>
+
+      <p class="auth-rodape">Ainda não tem conta? <a href="{{ url_for('publico.cadastro') }}" class="link">Criar meu evento</a></p>
+    </div>
+    <p class="auth-troca">Trabalha num evento? <a href="{{ url_for('publico.entrar_equipe') }}" class="link">Acesso da equipe</a></p>
+  </div>
+</main>
+{% endblock %}

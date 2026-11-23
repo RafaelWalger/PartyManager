@@ -1,0 +1,47 @@
+{% extends "equipe/_layout.html" %}
+{% import "fragmentos/macros.html" as m with context %}
+{% set titulo_barra = 'Resumo do turno' %}
+{% set voltar = true %}
+{% block titulo %}Resumo{% endblock %}
+{% block main_attrs %}data-atualizar-a-cada="30"{% endblock %}
+
+{% block conteudo %}
+<!-- Resumo da equipe: mais simples que o painel do organizador.
+     Mostra o movimento da portaria e as vendas da própria pessoa. -->
+<section class="kpis" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr))">
+  <div class="kpi vidro">
+    <span class="rotulo">{{ icone('acesso') }}Entraram</span>
+    <div class="valor">{{ entradas }}</div>
+    <div class="detalhe">de {{ evento.capacidade }} pessoas</div>
+    <div class="tracos" style="--pct:{{ pct(entradas, evento.capacidade) }}%"></div>
+  </div>
+  <div class="kpi vidro">
+    <span class="rotulo">{{ icone('loja') }}Suas vendas</span>
+    <div class="valor">{{ minhas_vendas | reais }}</div>
+    <div class="detalhe">Compras que você cobrou neste evento</div>
+  </div>
+  {% if vendas_do_ponto is not none %}
+  <div class="kpi vidro">
+    <span class="rotulo">{{ icone('painel') }}Vendas do ponto</span>
+    <div class="valor">{{ vendas_do_ponto | reais }}</div>
+    <div class="detalhe">Total do {{ func.ponto_nome }}</div>
+  </div>
+  {% endif %}
+</section>
+
+<section class="solido bloco">
+  <h2 style="margin-bottom: 14px">Suas últimas movimentações</h2>
+  {% if minhas_transacoes %}
+  <ul class="itens">
+    {% for t in minhas_transacoes %}
+    <li>
+      <span>{{ t.criado_em | hora }}&nbsp;&nbsp;{{ t.tipo | tipo_transacao }}{% if t.itens %}: {{ t.itens }}{% endif %}</span>
+      <span>{{ t.valor | reais }}</span>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="texto-3">Você ainda não fez nenhuma cobrança ou recarga.</p>
+  {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,120 @@
+{% extends "organizador/_layout.html" %}
+{% import "fragmentos/macros.html" as m with context %}
+{% block titulo %}Painel ao vivo{% endblock %}
+{% block main_attrs %}data-atualizar-a-cada="30"{% endblock %}
+
+{% block conteudo %}
+<header class="cabecalho-pagina">
+  <div>
+    <div class="trilha"><span>Painel ao vivo</span></div>
+    <h1>{{ evento_atual.nome }}</h1>
+    <p>{{ evento_atual.data_hora | data_hora }}, {{ evento_atual.local_evento }}</p>
+  </div>
+  <div class="acoes">
+    <span class="tag tag-ok">Atualiza a cada 30 segundos</span>
+    <a href="{{ url_for('organizador.transacoes') }}" class="btn btn-vidro">Ver transações</a>
+  </div>
+</header>
+
+{{ m.avisos() }}
+
+<!-- Primeiros passos: some quando o evento já está montado -->
+{% if not ingressos_por_lote or not tem_produtos or not tem_equipe %}
+<section class="solido bloco" style="margin-bottom: 16px">
+  <div class="titulo-bloco">
+    <div>
+      <h2>Termine de montar o evento</h2>
+      <p>Faltam poucos passos para começar a vender.</p>
+    </div>
+  </div>
+  <ul class="passos-evento">
+    <li><a href="{{ url_for('organizador.ingressos') }}" class="{{ 'feito' if ingressos_por_lote }}">
+      <span class="bolinha">✓</span>Criar os lotes de ingresso</a></li>
+    <li><a href="{{ url_for('organizador.produtos') }}" class="{{ 'feito' if tem_produtos }}">
+      <span class="bolinha">✓</span>Cadastrar os produtos</a></li>
+    <li><a href="{{ url_for('organizador.equipe') }}" class="{{ 'feito' if tem_equipe }}">
+      <span class="bolinha">✓</span>Criar os acessos da equipe</a></li>
+  </ul>
+</section>
+{% endif %}
+
+<!-- Indicadores: vidro sobre as luzes do fundo -->
+{% set ocupacao = pct(entradas, evento_atual.capacidade) %}
+<section class="kpis" aria-label="Indicadores do evento">
+  <div class="kpi vidro">
+    <span class="rotulo">{{ icone('acesso') }}Entraram</span>
+    <div class="valor">{{ entradas | numero }}</div>
+    <div class="detalhe">de {{ vendidos | numero }} ingressos, capacidade {{ evento_atual.capacidade | numero }}</div>
+    <div class="tracos" style="--pct:{{ ocupacao }}%" role="img" aria-label="{{ ocupacao }}% da capacidade"></div>
+  </div>
+  <div class="kpi vidro">
+    <span class="rotulo">{{ icone('painel') }}Faturamento</span>
+    <div class="valor">{{ faturamento | reais }}</div>
+    <div class="detalhe">{{ faturamento_ingressos | reais }} em ingressos</div>
+  </div>
+  <div class="kpi vidro">
+    <span class="rotulo">{{ icone('loja') }}Vendas na loja</span>
+    <div class="valor">{{ vendas | reais }}</div>
+    <div class="detalhe">Compras pagas com pulseira, já sem estornos</div>
+  </div>
+  <div class="kpi vidro">
+    <span class="rotulo">{{ icone('pulseira') }}Saldo nas pulseiras</span>
+    <div class="valor">{{ saldo_pulseiras | reais }}</div>
+    <div class="detalhe">Recarregado e ainda não gasto, em {{ pulseiras }} pulseiras</div>
+  </div>
+</section>
+
+<div class="grade-2">
+  <section class="solido bloco">
+    <div class="titulo-bloco">
+      <div><h2>Vendas por ponto</h2><p>Total vendido em cada bar, loja ou food truck</p></div>
+    </div>
+    {{ m.grafico(vendas_por_ponto, max_ponto, true) }}
+    <div class="resumo-saldo">
+      <div><span class="rotulo">Recargas</span><strong>{{ recargas | reais }}</strong></div>
+      <div><span class="rotulo">Gastos</span><strong>{{ vendas | reais }}</strong></div>
+      <div><span class="rotulo">Sobrou</span><strong class="realce">{{ saldo_pulseiras | reais }}</strong></div>
+    </div>
+  </section>
+
+  <div class="pilha">
+    <section class="solido bloco">
+      <div class="titulo-bloco"><div><h2>Ingressos por lote</h2><p>Quantidade vendida</p></div></div>
+      {{ m.grafico(ingressos_por_lote, max_lote, false) }}
+      {% if not ingressos_por_lote %}<p class="texto-3 pequeno">Nenhum lote criado ainda.</p>{% endif %}
+    </section>
+    <section class="solido bloco">
+      <div class="titulo-bloco"><div><h2>Mais vendidos</h2><p>Unidades vendidas na loja</p></div></div>
+      {{ m.grafico(mais_vendidos, max_produto, false, ' un.') }}
+      {% if not mais_vendidos %}<p class="texto-3 pequeno">As vendas aparecem aqui assim que a equipe começar a cobrar.</p>{% endif %}
+    </section>
+  </div>
+</div>
+
+<section class="solido bloco mt">
+  <div class="titulo-bloco">
+    <div><h2>Últimas movimentações</h2><p>Compras, recargas e estornos nas pulseiras</p></div>
+    <a href="{{ url_for('organizador.transacoes') }}" class="link pequeno">Ver todas</a>
+  </div>
+  {% if ultimas %}
+  <div class="tabela-rolagem">
+    <table class="tabela">
+      <thead><tr><th>Horário</th><th>Tipo</th><th>Ponto</th><th class="opcional">Quem fez</th><th class="num">Valor</th></tr></thead>
+      <tbody>
+        {% for t in ultimas %}
+        <tr>
+          <td>{{ t.criado_em | hora }}</td>
+          <td><span class="tag {{ {'recarga': 'tag-ok', 'estorno': 'tag-alerta'}.get(t.tipo, 'tag-destaque') }}">{{ t.tipo | tipo_transacao }}</span></td>
+          <td>{{ t.ponto_nome or 'Caixa' }}</td>
+          <td class="opcional fraco">{{ t.funcionario_nome or 'Organizador' }}</td>
+          <td class="num">{{ '− ' if t.tipo == 'debito' else '+ ' }}{{ t.valor | reais }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="texto-3 pequeno">Nenhuma movimentação ainda.</p>
+  {% endif %}
+</section>
+{% endblock %}

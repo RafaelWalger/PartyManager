@@ -1,0 +1,84 @@
+{% extends "organizador/_layout.html" %}
+{% import "fragmentos/macros.html" as m with context %}
+{% block titulo %}Pulseiras NFC{% endblock %}
+
+{% block conteudo %}
+<header class="cabecalho-pagina">
+  <div>
+    <div class="trilha"><a href="{{ url_for('organizador.painel') }}">Painel</a><span>/</span><span>Pulseiras NFC</span></div>
+    <h1>Pulseiras NFC</h1>
+    <p>As pulseiras são ativadas sozinhas na primeira recarga do caixa. Aqui você acompanha e bloqueia.</p>
+  </div>
+</header>
+
+{{ m.avisos() }}
+
+<section class="kpis" style="grid-template-columns: repeat(2, minmax(0, 320px))">
+  <div class="kpi vidro">
+    <span class="rotulo">{{ icone('pulseira') }}Pulseiras ativas</span>
+    <div class="valor">{{ ativas }}</div>
+  </div>
+  <div class="kpi vidro">
+    <span class="rotulo">{{ icone('caixa') }}Saldo somado</span>
+    <div class="valor">{{ saldo_total | reais }}</div>
+  </div>
+</section>
+
+<div class="grade-lateral">
+  <section class="solido bloco">
+    <div class="titulo-bloco">
+      <div><h2>Pulseiras do evento</h2></div>
+      <form action="{{ url_for('organizador.pulseiras') }}" method="get" role="search">
+        <label class="so-leitor" for="busca">Buscar pulseira</label>
+        <input type="search" id="busca" name="busca" value="{{ busca }}" placeholder="Código da pulseira" style="min-height: 40px; width: 220px">
+      </form>
+    </div>
+    {% if cartoes %}
+    <div class="tabela-rolagem">
+      <table class="tabela">
+        <thead><tr><th>Código (UID)</th><th>Situação</th><th class="num">Saldo</th><th></th></tr></thead>
+        <tbody>
+          {% for c in cartoes %}
+          <tr>
+            <td class="mono">{{ c.uid_nfc }}</td>
+            <td><span class="tag {{ 'tag-ok' if c.ativo else 'tag-erro' }}">{{ 'Ativa' if c.ativo else 'Bloqueada' }}</span></td>
+            <td class="num">{{ c.saldo | reais }}</td>
+            <td class="num">
+              <form action="{{ url_for('organizador.bloquear_pulseira', id=c.id) }}" method="post"
+                    {% if c.ativo %}data-confirmar="Bloquear esta pulseira? Ela não vai conseguir comprar nem recarregar."{% endif %}>
+                {{ m.csrf() }}
+                <button type="submit" class="link pequeno">{{ 'Bloquear' if c.ativo else 'Desbloquear' }}</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="vazio">
+      {{ icone('pulseira') }}
+      <h3>Nenhuma pulseira ainda</h3>
+      <p>Elas aparecem aqui quando a equipe do caixa faz a primeira recarga.</p>
+    </div>
+    {% endif %}
+  </section>
+
+  <section class="vidro bloco">
+    <h2 style="margin-bottom: 6px">Cadastrar pulseira</h2>
+    <p class="texto-2 pequeno" style="margin-bottom: 18px">Opcional: use para registrar pulseiras antes do evento.</p>
+    <form class="form" action="{{ url_for('organizador.cadastrar_pulseira') }}" method="post">
+      {{ m.csrf() }}
+      <div class="campo">
+        <label for="uid">Código da pulseira (UID)</label>
+        <input type="text" id="uid" name="uid" placeholder="04:A2:3F:1B:6C" autocomplete="off" required>
+        <span class="ajuda">Leitores USB digitam o código sozinhos.</span>
+      </div>
+      <button type="button" class="btn btn-vidro btn-bloco" data-leitor-nfc hidden>Ler pulseira com o celular</button>
+      <button type="submit" class="btn btn-primario btn-bloco">Cadastrar</button>
+    </form>
+  </section>
+</div>
+{% endblock %}
+
+{% block scripts %}<script src="/js/leitor.js"></script>{% endblock %}

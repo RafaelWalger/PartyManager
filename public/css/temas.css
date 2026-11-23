@@ -1,0 +1,141 @@
+/* =====================================================================
+   PartyManager — Temas de cor (presets) e modos claro / escuro
+   ---------------------------------------------------------------------
+   O <html> recebe dois atributos:
+     data-tema="neon | reveillon | carnaval | por-do-sol | aurora"
+     data-modo="escuro | claro"
+   Cada tema só troca as cores de destaque e as "luzes" do fundo.
+   A base preta e roxa é a mesma em todos.
+   ===================================================================== */
+
+/* ---------- Modo escuro (padrão) ---------- */
+:root,
+[data-modo="escuro"] {
+  color-scheme: dark;
+  --fundo: #08060f;            /* Noite */
+  --solido: #130e24;           /* Veludo: painéis sólidos */
+  --solido-2: #1b1532;         /* linhas de tabela, campos */
+  --solido-3: #251d42;
+  --linha: rgba(255, 255, 255, .08);
+  --linha-forte: rgba(255, 255, 255, .16);
+
+  --texto: #f3effd;
+  --texto-2: #b9b1d6;
+  --texto-3: #8178a6;
+
+  /* Vidro */
+  --vidro: rgba(30, 22, 58, .42);
+  --vidro-forte: rgba(24, 17, 48, .72);
+  --vidro-borda: rgba(255, 255, 255, .14);
+  --vidro-reflexo: rgba(255, 255, 255, .28);
+  --vidro-sombra: 0 24px 60px rgba(0, 0, 0, .45);
+
+  --sucesso: #4ade80;
+  --sucesso-fundo: rgba(74, 222, 128, .12);
+  --erro: #ff7a90;
+  --erro-fundo: rgba(255, 122, 144, .12);
+  --alerta: #fbbf24;
+  --alerta-fundo: rgba(251, 191, 36, .12);
+
+  --intensidade-luz: .55;
+}
+
+/* ---------- Modo claro ---------- */
+[data-modo="claro"] {
+  color-scheme: light;
+  --fundo: #f3f0fa;
+  --solido: #ffffff;
+  --solido-2: #f6f3fc;
+  --solido-3: #ece6f8;
+  --linha: rgba(40, 20, 90, .09);
+  --linha-forte: rgba(40, 20, 90, .18);
+
+  --texto: #1a1430;
+  --texto-2: #554b74;
+  --texto-3: #857ca3;
+
+  --vidro: rgba(255, 255, 255, .55);
+  --vidro-forte: rgba(255, 255, 255, .82);
+  --vidro-borda: rgba(255, 255, 255, .85);
+  --vidro-reflexo: rgba(255, 255, 255, .95);
+  --vidro-sombra: 0 18px 50px rgba(60, 30, 120, .14);
+
+  --sucesso: #15803d;
+  --sucesso-fundo: rgba(21, 128, 61, .10);
+  --erro: #c2264b;
+  --erro-fundo: rgba(194, 38, 75, .09);
+  --alerta: #a16207;
+  --alerta-fundo: rgba(161, 98, 7, .10);
+
+  --intensidade-luz: .38;
+}
+
+/* =====================================================================
+   PRESETS DE COR
+   --destaque      cor principal (botões, item ativo do menu)
+   --destaque-2    par do degradê dos botões
+   --destaque-txt  texto em cima do botão principal
+   --realce        cor de links e números destacados (legível no fundo)
+   --luz-1/2/3     luzes de palco do fundo
+   ===================================================================== */
+
+/* Roxo neon (padrão): ametista, magenta e ciano */
+:root,
+[data-tema="neon"] {
+  --destaque: #8b5cf6;
+  --destaque-2: #c446e0;
+  --destaque-txt: #ffffff;
+  --luz-1: #7c3aed;
+  --luz-2: #e0459b;
+  --luz-3: #22b8d4;
+}
+[data-tema="neon"][data-modo="escuro"], :root:not([data-modo="claro"]) { --realce: #c4b0ff; }
+[data-tema="neon"][data-modo="claro"] { --realce: #6d3fd9; }
+
+/* Réveillon: champanhe dourado sobre a noite roxa */
+[data-tema="reveillon"] {
+  --destaque: #e7b84c;
+  --destaque-2: #f6dc8c;
+  --destaque-txt: #1d1405;
+  --luz-1: #6d28d9;
+  --luz-2: #e7b84c;
+  --luz-3: #c9c2ff;
+}
+[data-tema="reveillon"][data-modo="escuro"] { --realce: #f3d27a; }
+[data-tema="reveillon"][data-modo="claro"] { --realce: #8a6212; }
+
+/* Carnaval: magenta, amarelo e verde */
+[data-tema="carnaval"] {
+  --destaque: #e0328a;
+  --destaque-2: #f59e0b;
+  --destaque-txt: #ffffff;
+  --luz-1: #9333ea;
+  --luz-2: #facc15;
+  --luz-3: #22c55e;
+}
+[data-tema="carnaval"][data-modo="escuro"] { --realce: #ff8cc6; }
+[data-tema="carnaval"][data-modo="claro"] { --realce: #b0216b; }
+
+/* Pôr do sol: coral e laranja */
+[data-tema="por-do-sol"] {
+  --destaque: #f2557a;
+  --destaque-2: #f9873d;
+  --destaque-txt: #ffffff;
+  --luz-1: #7e22ce;
+  --luz-2: #f2557a;
+  --luz-3: #f9873d;
+}
+[data-tema="por-do-sol"][data-modo="escuro"] { --realce: #ffa3b5; }
+[data-tema="por-do-sol"][data-modo="claro"] { --realce: #be2c52; }
+
+/* Aurora: verde-água e azul */
+[data-tema="aurora"] {
+  --destaque: #2cc9b4;
+  --destaque-2: #5b8cff;
+  --destaque-txt: #04131a;
+  --luz-1: #6d28d9;
+  --luz-2: #2cc9b4;
+  --luz-3: #5b8cff;
+}
+[data-tema="aurora"][data-modo="escuro"] { --realce: #7ff0de; }
+[data-tema="aurora"][data-modo="claro"] { --realce: #0f7d70; }

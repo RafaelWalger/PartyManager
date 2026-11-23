@@ -1,0 +1,52 @@
+{% extends "equipe/_layout.html" %}
+{% import "fragmentos/macros.html" as m with context %}
+{% set titulo_barra = 'Modo operador' %}
+{% set voltar = false %}
+{% block titulo %}Modo operador{% endblock %}
+
+{% block conteudo %}
+{{ m.avisos() }}
+
+<div class="saudacao">
+  <h1>Bom turno, {{ func.nome | primeiro_nome }}</h1>
+  <p>Escolha o que você vai fazer agora.</p>
+</div>
+
+<!-- Só aparecem as funções que o organizador liberou -->
+<nav class="funcoes" aria-label="Funções">
+  {% if func.perm_escanear %}
+  <a href="{{ url_for('equipe.portaria') }}" class="funcao vidro">
+    <span class="icone-funcao">{{ icone('qr') }}</span>
+    <span><strong>Portaria</strong><small>Ler o QR Code dos ingressos</small></span>
+  </a>
+  <a href="{{ url_for('equipe.lista_de_acesso') }}" class="funcao vidro">
+    <span class="icone-funcao">{{ icone('acesso') }}</span>
+    <span><strong>Lista de acesso</strong><small>Quem já entrou e quem falta</small></span>
+  </a>
+  {% endif %}
+  {% if func.perm_pdv %}
+  <a href="{{ url_for('equipe.pdv') }}" class="funcao vidro">
+    <span class="icone-funcao">{{ icone('loja') }}</span>
+    <span><strong>Ponto de venda</strong><small>{{ 'Vender no ' ~ func.ponto_nome if func.ponto_nome else 'Vender e cobrar na pulseira' }}</small></span>
+  </a>
+  {% endif %}
+  {% if func.perm_caixa %}
+  <a href="{{ url_for('equipe.caixa') }}" class="funcao vidro">
+    <span class="icone-funcao">{{ icone('caixa') }}</span>
+    <span><strong>Caixa</strong><small>Recarregar e consultar pulseiras</small></span>
+  </a>
+  {% endif %}
+  {% if func.perm_relatorios %}
+  <a href="{{ url_for('equipe.resumo') }}" class="funcao vidro">
+    <span class="icone-funcao">{{ icone('resumo') }}</span>
+    <span><strong>Resumo</strong><small>Entradas e suas vendas</small></span>
+  </a>
+  {% endif %}
+</nav>
+
+{% if not (func.perm_escanear or func.perm_pdv or func.perm_caixa or func.perm_relatorios) %}
+<div class="sem-funcoes vidro">
+  Nenhuma função liberada para você ainda. Peça para o organizador ajustar suas permissões.
+</div>
+{% endif %}
+{% endblock %}

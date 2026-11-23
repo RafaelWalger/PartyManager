@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% import "fragmentos/macros.html" as m with context %}
+{% block titulo %}Termos e privacidade{% endblock %}
+{% block luzes %}luzes-calmas{% endblock %}
+
+{% block corpo %}
+<main class="pagina-auth">
+  <article class="auth auth-largo">
+    <div class="vidro">
+      <div class="auth-topo">
+        {{ m.marca('/') }}
+        {{ m.alternar_modo() }}
+      </div>
+      <h1>Termos de uso e privacidade</h1>
+      <p class="sub">Versão para o projeto acadêmico. Antes de usar com clientes reais, este texto precisa ser revisado por alguém da área jurídica.</p>
+
+      <div class="pilha texto-2">
+        <section>
+          <h3>Quais dados guardamos</h3>
+          <p>Do organizador: nome, CPF, e-mail e senha (criptografada com BCrypt). Dos participantes: nome e, se informado, e-mail no ingresso. Das pulseiras: apenas o código do chip e o saldo.</p>
+        </section>
+        <section>
+          <h3>Para que usamos</h3>
+          <p>Só para o funcionamento do evento: emitir e validar ingressos, cobrar e recarregar pulseiras e gerar relatórios para o organizador.</p>
+        </section>
+        <section>
+          <h3>Seus direitos (LGPD)</h3>
+          <p>Você pode pedir a qualquer momento a cópia, a correção ou a exclusão dos seus dados pelo e-mail de contato do organizador.</p>
+        </section>
+      </div>
+
+      <p class="auth-rodape"><a href="/" class="link">Voltar para o início</a></p>
+    </div>
+  </article>
+</main>
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends "equipe/_layout.html" %}
+{% import "fragmentos/macros.html" as m with context %}
+{% set titulo_barra = 'Cobrar saldo' %}
+{% set voltar = true %}
+{% block titulo %}Cobrar saldo{% endblock %}
+{% block main_classe %}area-estreita{% endblock %}
+
+{% block conteudo %}
+{% if erro %}
+<p class="aviso aviso-erro" role="alert" style="margin-bottom: 16px">{{ icone('alerta') }}<span>{{ erro }}</span></p>
+{% endif %}
+
+<section class="vidro bloco-g">
+  <span class="rotulo">Total da compra, {{ ponto.nome }}</span>
+  <div class="valor-gigante">{{ total | reais }}</div>
+  <div class="separador"></div>
+  <ul class="itens">
+    {% for i in itens %}
+    <li><span>{{ i.quantidade }} × {{ i.nome }}</span><span>{{ i.subtotal | reais }}</span></li>
+    {% endfor %}
+  </ul>
+</section>
+
+<!-- A pulseira é lida por leitor USB (digita o código), pelo NFC do celular ou digitada -->
+<form class="leitor vidro mt" action="{{ url_for('equipe.confirmar') }}" method="post">
+  {{ m.csrf() }}
+  <div class="leitor-onda">{{ icone('pulseira') }}</div>
+  <div>
+    <h1 style="font-size: 1.4rem">Aproxime a pulseira</h1>
+    <p class="texto-2 pequeno">O valor é debitado assim que você confirmar.</p>
+  </div>
+  <input type="hidden" name="ponto_id" value="{{ ponto.id }}">
+  {% for i in itens %}<input type="hidden" name="q_{{ i.produto_id }}" value="{{ i.quantidade }}">{% endfor %}
+  <label class="so-leitor" for="uid">Código da pulseira</label>
+  <input type="text" id="uid" name="uid" class="input-g" placeholder="04:A2:3F:1B" autocomplete="off"
+         spellcheck="false" required autofocus>
+  <button type="button" class="btn btn-vidro btn-g btn-bloco" data-leitor-nfc data-enviar="nao" hidden>Ler com o celular</button>
+  <button type="submit" class="btn btn-primario btn-g btn-bloco">Confirmar {{ total | reais }}</button>
+  <a href="{{ url_for('equipe.pdv', ponto_id=ponto.id) }}" class="btn btn-fantasma btn-bloco">Voltar e mudar o pedido</a>
+</form>
+{% endblock %}
+
+{% block scripts %}<script src="/js/leitor.js"></script>{% endblock %}

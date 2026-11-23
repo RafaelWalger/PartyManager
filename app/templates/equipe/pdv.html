@@ -1,0 +1,71 @@
+{% extends "equipe/_layout.html" %}
+{% import "fragmentos/macros.html" as m with context %}
+{% set titulo_barra = 'Ponto de venda' %}
+{% set voltar = true %}
+{% block titulo %}Ponto de venda{% endblock %}
+{% block luzes %}luzes-calmas{% endblock %}
+{% block main_attrs %}style="width: min(1180px, 100%)"{% endblock %}
+
+{% block conteudo %}
+{{ m.avisos() }}
+
+<!-- Funcionário sem ponto fixo escolhe onde está vendendo -->
+{% if not func.ponto_id and pontos | length > 1 %}
+<form class="linha" action="{{ url_for('equipe.pdv') }}" method="get" style="margin-bottom: 14px">
+  <label for="ponto" class="rotulo">Você está no</label>
+  <select id="ponto" name="ponto_id" onchange="this.form.submit()" style="width: auto; min-height: 40px">
+    {% for p in pontos %}
+    <option value="{{ p.id }}" {% if p.id == ponto.id %}selected{% endif %}>{{ p.nome }}</option>
+    {% endfor %}
+  </select>
+</form>
+{% endif %}
+
+<div class="pdv">
+  <section>
+    <div class="filtros" role="group" aria-label="Categorias">
+      <button type="button" class="filtro ativo" data-categoria="todos" aria-pressed="true">Todos</button>
+      <button type="button" class="filtro" data-categoria="bebida" aria-pressed="false">Bebidas</button>
+      <button type="button" class="filtro" data-categoria="comida" aria-pressed="false">Comidas</button>
+      <button type="button" class="filtro" data-categoria="loja" aria-pressed="false">Loja</button>
+    </div>
+    <div class="produtos" id="produtos">
+      {% for p in produtos %}
+      <button type="button" class="produto" data-id="{{ p.id }}" data-nome="{{ p.nome }}" data-preco="{{ p.preco }}"
+              data-estoque="{{ p.estoque }}" data-categoria="{{ p.categoria }}" {% if p.estoque == 0 %}disabled{% endif %}>
+        <span class="qtd" hidden>0</span>
+        <strong>{{ p.nome }}</strong>
+        <span class="estoque">{{ 'Esgotado' if p.estoque == 0 else 'Estoque: ' ~ p.estoque }}</span>
+        <span class="preco">{{ p.preco | reais }}</span>
+      </button>
+      {% endfor %}
+    </div>
+    {% if not produtos %}
+    <div class="vazio solido">
+      <h3>Nenhum produto à venda</h3>
+      <p>O organizador ainda não cadastrou produtos para este evento.</p>
+    </div>
+    {% endif %}
+  </section>
+
+  <!-- Carrinho (vidro, fica fixo ao rolar) -->
+  <aside class="carrinho vidro vidro-forte" aria-label="Carrinho">
+    <div class="linha entre">
+      <h2>Pedido <span class="texto-3" style="font-weight: 500" id="contador">0 itens</span></h2>
+      <button type="button" class="link pequeno" id="btn-limpar">Limpar</button>
+    </div>
+    <ul class="carrinho-lista" id="carrinho-lista"></ul>
+    <div class="total"><span class="texto-2">Total</span><strong id="total">R$ 0,00</strong></div>
+    <form action="{{ url_for('equipe.cobrar') }}" method="post">
+      {{ m.csrf() }}
+      <input type="hidden" name="ponto_id" value="{{ ponto.id }}">
+      <div id="campos-carrinho"></div>
+      <button type="submit" id="btn-cobrar" class="btn btn-primario btn-g btn-bloco" disabled>
+        {{ icone('pulseira') }}Cobrar na pulseira
+      </button>
+    </form>
+  </aside>
+</div>
+{% endblock %}
+
+{% block scripts %}<script src="/js/pdv.js"></script>{% endblock %}

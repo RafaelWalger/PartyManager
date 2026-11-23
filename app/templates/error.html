@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block titulo %}Algo deu errado{% endblock %}
+{% block luzes %}luzes-calmas{% endblock %}
+
+{% block corpo %}
+<!-- Página de erro genérica: a mesma resposta para qualquer erro.
+     Não mostra código, detalhe técnico nem o motivo (isso fica só no log do servidor). -->
+<main class="erro-pagina">
+  <div class="vidro">
+    <h1>Algo deu errado</h1>
+    <p class="texto-2 mt">Não foi possível abrir esta página. Volte e tente de novo.</p>
+    <div class="linha mt" style="justify-content: center">
+      {% if usuario and usuario.tipo == 'funcionario' %}
+      <a href="/equipe" class="btn btn-primario">Voltar ao modo operador</a>
+      {% elif usuario and usuario.tipo == 'organizador' %}
+      <a href="/organizador" class="btn btn-primario">Voltar ao painel</a>
+      {% else %}
+      <a href="/" class="btn btn-primario">Ir para o início</a>
+      {% endif %}
+    </div>
+  </div>
+</main>
+{% endblock %}

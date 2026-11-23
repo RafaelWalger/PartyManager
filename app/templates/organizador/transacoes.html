@@ -1,0 +1,65 @@
+{% extends "organizador/_layout.html" %}
+{% import "fragmentos/macros.html" as m with context %}
+{% block titulo %}Transações{% endblock %}
+
+{% block conteudo %}
+<header class="cabecalho-pagina">
+  <div>
+    <div class="trilha"><a href="{{ url_for('organizador.painel') }}">Painel</a><span>/</span><span>Transações</span></div>
+    <h1>Transações</h1>
+    <p>Toda compra, recarga e estorno feito nas pulseiras. Compras podem ser estornadas.</p>
+  </div>
+  <nav class="filtros" aria-label="Filtrar por tipo" style="margin-bottom: 0">
+    {% for valor_filtro, texto in [('', 'Todas'), ('debito', 'Compras'), ('recarga', 'Recargas'), ('estorno', 'Estornos')] %}
+    <a href="{{ url_for('organizador.transacoes', tipo=valor_filtro or none) }}" class="filtro {{ 'ativo' if tipo == valor_filtro }}">{{ texto }}</a>
+    {% endfor %}
+  </nav>
+</header>
+
+{{ m.avisos() }}
+
+<section class="solido bloco">
+  {% if transacoes %}
+  <div class="tabela-rolagem">
+    <table class="tabela">
+      <thead>
+        <tr><th>Quando</th><th>Tipo</th><th>Detalhe</th><th class="opcional">Pulseira</th><th class="opcional">Quem fez</th><th class="num">Valor</th><th></th></tr>
+      </thead>
+      <tbody>
+        {% for t in transacoes %}
+        <tr>
+          <td class="fraco">{{ t.criado_em | curta }}</td>
+          <td><span class="tag {{ {'recarga': 'tag-ok', 'estorno': 'tag-alerta'}.get(t.tipo, 'tag-destaque') }}">{{ t.tipo | tipo_transacao }}</span></td>
+          <td>
+            {% if t.tipo == 'debito' %}<span>{{ t.itens or '—' }}</span>
+            {% elif t.tipo == 'recarga' %}<span>Pago com {{ 'cartão' if t.forma_pagamento == 'cartao' else t.forma_pagamento }}</span>
+            {% else %}<span>Devolução da compra nº {{ t.transacao_origem_id }}</span>{% endif %}
+            <br><span class="fraco pequeno">{{ t.ponto_nome or 'Caixa' }}</span>
+          </td>
+          <td class="opcional mono fraco">{{ t.uid_nfc }}</td>
+          <td class="opcional">{{ t.funcionario_nome or 'Organizador' }}</td>
+          <td class="num">{{ '− ' if t.tipo == 'debito' else '+ ' }}{{ t.valor | reais }}</td>
+          <td class="num">
+            {% if t.tipo == 'debito' and not t.estornada %}
+            <form action="{{ url_for('organizador.estornar', id=t.id) }}" method="post"
+                  data-confirmar="Estornar {{ t.valor | reais }}? O valor volta para a pulseira e os produtos voltam para o estoque.">
+              {{ m.csrf() }}
+              <button type="submit" class="btn btn-perigo btn-p">Estornar</button>
+            </form>
+            {% endif %}
+            {% if t.estornada %}<span class="tag">Estornada</span>{% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="vazio">
+    {{ icone('transacao') }}
+    <h3>Nada por aqui ainda</h3>
+    <p>As movimentações aparecem assim que a equipe fizer a primeira recarga ou venda.</p>
+  </div>
+  {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,45 @@
+{% extends "organizador/_layout.html" %}
+{% import "fragmentos/macros.html" as m with context %}
+{% block titulo %}Ingresso{% endblock %}
+
+{% block conteudo %}
+<header class="cabecalho-pagina">
+  <div>
+    <div class="trilha"><a href="{{ url_for('organizador.ingressos') }}">Ingressos</a><span>/</span><span>{{ ingresso.qr_code }}</span></div>
+    <h1>{{ ingresso.nome_participante }}</h1>
+  </div>
+  <div class="acoes">
+    <button type="button" class="btn btn-vidro" onclick="window.print()">{{ icone('imprimir') }}Imprimir</button>
+    {% if ingresso.status == 'valido' %}
+    <form action="{{ url_for('organizador.cancelar_ingresso', id=ingresso.id) }}" method="post"
+          data-confirmar="Cancelar este ingresso? Ele não vai mais passar na portaria.">
+      {{ m.csrf() }}
+      <button type="submit" class="btn btn-perigo">Cancelar ingresso</button>
+    </form>
+    {% endif %}
+  </div>
+</header>
+
+{{ m.avisos() }}
+
+<article class="ingresso-cartao vidro" style="max-width: 760px">
+  <div class="ingresso-dados">
+    {% if ingresso.status == 'usado' %}<span class="tag tag-ok">Já entrou</span>
+    {% elif ingresso.status == 'cancelado' %}<span class="tag tag-erro">Cancelado</span>
+    {% else %}<span class="tag tag-destaque">Válido</span>{% endif %}
+    <h2 class="mt" style="font-size: 1.8rem">{{ evento_atual.nome }}</h2>
+    <dl>
+      <dt>Participante</dt><dd>{{ ingresso.nome_participante }}</dd>
+      <dt>Lote</dt><dd>{{ ingresso.lote_nome }}, {{ ingresso.valor | reais }}</dd>
+      <dt>Quando</dt><dd>{{ evento_atual.data_hora | data_hora }}</dd>
+      <dt>Onde</dt><dd>{{ evento_atual.local_evento }}</dd>
+      <dt>Código</dt><dd class="mono">{{ ingresso.qr_code }}</dd>
+      {% if ingresso.usado_em %}
+      <dt>Entrada</dt><dd>{{ ingresso.usado_em | data_hora }}</dd>
+      {% endif %}
+    </dl>
+  </div>
+  <img class="ingresso-qr" src="{{ url_for('organizador.qr_code', id=ingresso.id) }}"
+       alt="QR Code do ingresso {{ ingresso.qr_code }}" width="200" height="200">
+</article>
+{% endblock %}

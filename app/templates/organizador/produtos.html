@@ -1,0 +1,97 @@
+{% extends "organizador/_layout.html" %}
+{% import "fragmentos/macros.html" as m with context %}
+{% block titulo %}Loja e produtos{% endblock %}
+
+{% block conteudo %}
+<header class="cabecalho-pagina">
+  <div>
+    <div class="trilha"><a href="{{ url_for('organizador.painel') }}">Painel</a><span>/</span><span>Loja e produtos</span></div>
+    <h1>Loja e produtos</h1>
+    <p>O que a equipe vende nos pontos de venda. O estoque baixa sozinho a cada compra.</p>
+  </div>
+</header>
+
+{{ m.avisos() }}
+
+<div class="grade-lateral">
+  <section class="solido bloco">
+    <div class="titulo-bloco"><div><h2>Produtos</h2><p>Altere preço e estoque direto na linha</p></div></div>
+    {% if produtos %}
+    <div class="tabela-rolagem">
+      <table class="tabela">
+        <thead><tr><th>Produto</th><th class="opcional">Categoria</th><th>Preço e estoque</th><th></th></tr></thead>
+        <tbody>
+          {% for p in produtos %}
+          <tr {% if not p.ativo %}style="opacity:.55"{% endif %}>
+            <td><strong>{{ p.nome }}</strong>
+              <br>{% if p.estoque == 0 %}<span class="tag tag-erro">Esgotado</span>{% endif %}
+              {% if not p.ativo %}<span class="tag">Fora de venda</span>{% endif %}</td>
+            <td class="opcional">{{ p.categoria | categoria }}</td>
+            <td>
+              <form class="linha" action="{{ url_for('organizador.atualizar_produto', id=p.id) }}" method="post" style="flex-wrap: nowrap">
+                {{ m.csrf() }}
+                <label class="so-leitor" for="preco-{{ p.id }}">Preço</label>
+                <input type="text" id="preco-{{ p.id }}" name="preco" value="{{ p.preco | valor }}" inputmode="decimal" style="width: 96px; min-height: 38px">
+                <label class="so-leitor" for="est-{{ p.id }}">Estoque</label>
+                <input type="number" id="est-{{ p.id }}" name="estoque" value="{{ p.estoque }}" min="0" style="width: 84px; min-height: 38px">
+                <button type="submit" class="btn btn-fantasma btn-p">Salvar</button>
+              </form>
+            </td>
+            <td class="num">
+              <form action="{{ url_for('organizador.alternar_produto', id=p.id) }}" method="post">
+                {{ m.csrf() }}
+                <button type="submit" class="link pequeno">{{ 'Tirar de venda' if p.ativo else 'Voltar a vender' }}</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="vazio">
+      {{ icone('produto') }}
+      <h3>Nenhum produto cadastrado</h3>
+      <p>Cadastre bebidas, comidas e itens da loja no formulário ao lado. Eles aparecem na hora para a equipe.</p>
+    </div>
+    {% endif %}
+  </section>
+
+  <div class="pilha">
+    <section class="vidro bloco">
+      <h2 style="margin-bottom: 18px">Novo produto</h2>
+      <form class="form" action="{{ url_for('organizador.criar_produto') }}" method="post">
+        {{ m.csrf() }}
+        <div class="campo"><label for="p-nome">Nome</label><input type="text" id="p-nome" name="nome" placeholder="Chopp 500ml" required></div>
+        <div class="campo">
+          <label for="p-cat">Categoria</label>
+          <select id="p-cat" name="categoria">
+            <option value="bebida">Bebida</option>
+            <option value="comida">Comida</option>
+            <option value="loja">Loja (copos, camisetas...)</option>
+          </select>
+        </div>
+        <div class="campos">
+          <div class="campo"><label for="p-preco">Preço (R$)</label><input type="text" id="p-preco" name="preco" inputmode="decimal" placeholder="12,00" required></div>
+          <div class="campo"><label for="p-est">Estoque</label><input type="number" id="p-est" name="estoque" min="0" placeholder="100" required></div>
+        </div>
+        <button type="submit" class="btn btn-primario btn-bloco">Cadastrar produto</button>
+      </form>
+    </section>
+
+    <section class="solido bloco">
+      <h2 style="margin-bottom: 4px">Pontos de venda</h2>
+      <p class="texto-3 pequeno" style="margin-bottom: 14px">Cada funcionário do PDV pode ficar fixo em um ponto.</p>
+      <div class="opcoes" style="margin-bottom: 14px">
+        {% for pt in pontos %}<span class="tag">{{ pt.nome }}</span>{% endfor %}
+      </div>
+      <form class="linha" action="{{ url_for('organizador.criar_ponto') }}" method="post" style="flex-wrap: nowrap">
+        {{ m.csrf() }}
+        <label class="so-leitor" for="ponto-nome">Nome do novo ponto</label>
+        <input type="text" id="ponto-nome" name="nome" placeholder="Food truck" required>
+        <button type="submit" class="btn btn-vidro">Adicionar</button>
+      </form>
+    </section>
+  </div>
+</div>
+{% endblock %}

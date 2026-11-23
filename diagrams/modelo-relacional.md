@@ -1,0 +1,123 @@
+# Modelo relacional do PartyManager
+
+Diagrama gerado a partir de `database/01_criacao_tabelas.sql`. O GitHub desenha o diagrama abaixo automaticamente.
+
+```mermaid
+erDiagram
+    ORGANIZADOR ||--o{ EVENTO : cria
+    EVENTO ||--o{ LOTE : tem
+    EVENTO ||--o{ INGRESSO : emite
+    LOTE ||--o{ INGRESSO : agrupa
+    EVENTO ||--o{ PONTO_VENDA : tem
+    EVENTO ||--o{ PRODUTO : vende
+    EVENTO ||--o{ FUNCIONARIO : contrata
+    PONTO_VENDA |o--o{ FUNCIONARIO : "fixa (opcional)"
+    EVENTO ||--o{ CARTAO_SALDO : ativa
+    CARTAO_SALDO ||--o{ TRANSACAO : movimenta
+    FUNCIONARIO |o--o{ TRANSACAO : registra
+    PONTO_VENDA |o--o{ TRANSACAO : "onde vendeu"
+    TRANSACAO |o--o| TRANSACAO : "estorno de"
+    TRANSACAO ||--o{ ITEM_TRANSACAO : contem
+    PRODUTO ||--o{ ITEM_TRANSACAO : "aparece em"
+
+    ORGANIZADOR {
+        BIGINT id PK
+        VARCHAR nome
+        VARCHAR cpf UK
+        VARCHAR email UK
+        VARCHAR senha_hash "BCrypt"
+        VARCHAR plano "basico, profissional, festival"
+        VARCHAR status_assinatura
+        VARCHAR tema
+        VARCHAR modo "escuro ou claro"
+        TIMESTAMP criado_em
+    }
+    EVENTO {
+        BIGINT id PK
+        BIGINT organizador_id FK
+        VARCHAR nome
+        TIMESTAMP data_hora
+        VARCHAR local_evento
+        VARCHAR classificacao
+        INTEGER capacidade
+        VARCHAR codigo_acesso UK "login da equipe"
+    }
+    LOTE {
+        BIGINT id PK
+        BIGINT evento_id FK
+        VARCHAR nome
+        BIGINT preco "centavos"
+        INTEGER quantidade
+    }
+    INGRESSO {
+        BIGINT id PK
+        BIGINT evento_id FK
+        BIGINT lote_id FK
+        VARCHAR nome_participante
+        VARCHAR email_participante
+        VARCHAR qr_code UK
+        BIGINT valor "centavos"
+        VARCHAR status "valido, usado, cancelado"
+        TIMESTAMP usado_em
+    }
+    PONTO_VENDA {
+        BIGINT id PK
+        BIGINT evento_id FK
+        VARCHAR nome
+    }
+    PRODUTO {
+        BIGINT id PK
+        BIGINT evento_id FK
+        VARCHAR nome
+        VARCHAR categoria
+        BIGINT preco "centavos"
+        INTEGER estoque
+        BOOLEAN ativo
+    }
+    FUNCIONARIO {
+        BIGINT id PK
+        BIGINT evento_id FK
+        BIGINT ponto_id FK
+        VARCHAR nome
+        VARCHAR usuario "único por evento"
+        VARCHAR senha_hash "BCrypt"
+        BOOLEAN perm_escanear
+        BOOLEAN perm_pdv
+        BOOLEAN perm_caixa
+        BOOLEAN perm_relatorios
+        BOOLEAN ativo
+    }
+    CARTAO_SALDO {
+        BIGINT id PK
+        BIGINT evento_id FK
+        VARCHAR uid_nfc "único por evento"
+        BIGINT saldo "centavos, nunca negativo"
+        BOOLEAN ativo
+    }
+    TRANSACAO {
+        BIGINT id PK
+        BIGINT cartao_id FK
+        BIGINT funcionario_id FK
+        BIGINT ponto_id FK
+        BIGINT valor "centavos"
+        VARCHAR tipo "debito, recarga, estorno"
+        VARCHAR forma_pagamento
+        BIGINT transacao_origem_id FK
+        TIMESTAMP criado_em
+    }
+    ITEM_TRANSACAO {
+        BIGINT id PK
+        BIGINT transacao_id FK
+        BIGINT produto_id FK
+        INTEGER quantidade
+        BIGINT preco_unitario "centavos"
+    }
+```
+
+## Decisões do modelo
+
+- **Dinheiro em centavos (`BIGINT`)**: R$ 12,50 vira `1250`. Evita erro de arredondamento.
+- **`lote` virou tabela própria**: no PDF o lote era um texto dentro de `ingresso`. Separado, dá para controlar preço e quantidade de cada lote.
+- **`ponto_venda` e `item_transacao` são novas**: permitem saber onde cada venda aconteceu e quais produtos saíram (para estoque e relatórios).
+- **Estorno aponta para a compra original** (`transacao_origem_id`), e um índice único garante que a mesma compra nunca é estornada duas vezes.
+- **`saldo >= 0` é regra do banco** (`CHECK`), além de ser conferido no Python: mesmo com duas cobranças ao mesmo tempo, o saldo nunca fica negativo.

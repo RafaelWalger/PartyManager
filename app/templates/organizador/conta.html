@@ -1,0 +1,67 @@
+{% extends "organizador/_layout.html" %}
+{% import "fragmentos/macros.html" as m with context %}
+{% block titulo %}Conta e aparência{% endblock %}
+
+{% block conteudo %}
+<header class="cabecalho-pagina">
+  <div>
+    <div class="trilha"><span>Conta e aparência</span></div>
+    <h1>Conta e aparência</h1>
+  </div>
+</header>
+
+{{ m.avisos() }}
+
+<div class="pilha" style="max-width: 860px">
+  <!-- Aparência -->
+  <section class="vidro bloco">
+    <div class="titulo-bloco">
+      <div><h2>Aparência</h2><p>A prévia muda na hora. Clique em salvar para guardar na sua conta.</p></div>
+    </div>
+    <form class="form" action="{{ url_for('organizador.aparencia') }}" method="post">
+      {{ m.csrf() }}
+      {{ m.opcoes_tema() }}
+      <fieldset style="border: 0">
+        <legend class="rotulo" style="margin-bottom: 8px">Modo</legend>
+        <div class="formas" style="grid-template-columns: repeat(2, minmax(0, 180px))">
+          <input type="radio" id="modo-escuro" name="modo" value="escuro" {% if modo == 'escuro' %}checked{% endif %} data-escolher-modo>
+          <label for="modo-escuro">Escuro</label>
+          <input type="radio" id="modo-claro" name="modo" value="claro" {% if modo == 'claro' %}checked{% endif %} data-escolher-modo>
+          <label for="modo-claro">Claro</label>
+        </div>
+      </fieldset>
+      <div><button type="submit" class="btn btn-primario">Salvar aparência</button></div>
+    </form>
+  </section>
+
+  <div class="grade-2">
+    <!-- Dados -->
+    <section class="solido bloco">
+      <h2 style="margin-bottom: 18px">Seus dados</h2>
+      <form class="form" action="{{ url_for('organizador.dados') }}" method="post">
+        {{ m.csrf() }}
+        <div class="campo"><label for="c-nome">Nome</label><input type="text" id="c-nome" name="nome" value="{{ org.nome }}" required></div>
+        <div class="campo"><label for="c-email">E-mail</label><input type="email" id="c-email" value="{{ org.email }}" disabled></div>
+        <div class="campo"><label>Plano</label>
+          <p class="linha"><strong>{{ plano.nome }}</strong>
+            <span class="texto-3">{{ plano.preco | reais }} por mês</span></p>
+        </div>
+        <div><button type="submit" class="btn btn-vidro">Salvar dados</button></div>
+      </form>
+    </section>
+
+    <!-- Senha -->
+    <section class="solido bloco">
+      <h2 style="margin-bottom: 18px">Trocar senha</h2>
+      <form class="form" action="{{ url_for('organizador.senha') }}" method="post">
+        {{ m.csrf() }}
+        <div class="campo"><label for="s-atual">Senha atual</label><input type="password" id="s-atual" name="atual" autocomplete="current-password" required></div>
+        <div class="campo"><label for="s-nova">Nova senha</label><input type="password" id="s-nova" name="nova" autocomplete="new-password" minlength="8" required>
+          <span class="ajuda">Mínimo de 8 caracteres, com letras e números.</span></div>
+        <div class="campo"><label for="s-conf">Repita a nova senha</label><input type="password" id="s-conf" name="confirmacao" autocomplete="new-password" minlength="8" required></div>
+        <div><button type="submit" class="btn btn-vidro">Trocar senha</button></div>
+      </form>
+    </section>
+  </div>
+</div>
+{% endblock %}

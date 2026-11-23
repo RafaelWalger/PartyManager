@@ -1,0 +1,4 @@
+# Guarda os arquivos de texto com fim de linha do Linux (LF) no repositório
+* text=auto eol=lf
+*.woff2 binary
+*.pdf binary

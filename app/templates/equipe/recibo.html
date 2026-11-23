@@ -1,0 +1,24 @@
+{% extends "equipe/_layout.html" %}
+{% import "fragmentos/macros.html" as m with context %}
+{% set titulo_barra = 'Venda concluída' %}
+{% set voltar = true %}
+{% block titulo %}Venda concluída{% endblock %}
+{% block main_classe %}area-estreita{% endblock %}
+
+{% block conteudo %}
+<section class="vidro bloco-g" style="text-align: center">
+  <div class="sucesso-sinal">{{ icone('check') }}</div>
+  <h1>Cobrança aprovada</h1>
+  <p class="texto-2">{{ transacao.valor | reais }} debitados da pulseira</p>
+
+  <ul class="recibo mt" style="text-align: left">
+    {% for i in itens %}<li><span>{{ i.quantidade }} × {{ i.nome }}</span><span>{{ i.subtotal | reais }}</span></li>{% endfor %}
+    <li><span>Venda nº</span><span>{{ transacao.id }}</span></li>
+    <li><span>Pulseira</span><span class="mono">{{ transacao.uid_nfc }}</span></li>
+    <li><span>Horário</span><span>{{ transacao.criado_em | hora }}</span></li>
+    {% if cartao %}<li><span>Saldo restante</span><strong class="realce">{{ cartao.saldo | reais }}</strong></li>{% endif %}
+  </ul>
+
+  <a href="{{ url_for('equipe.pdv') }}" class="btn btn-primario btn-g btn-bloco mt">Nova venda</a>
+</section>
+{% endblock %}

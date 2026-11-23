@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+{% import "fragmentos/macros.html" as m with context %}
+{% block titulo %}Gestão de eventos por assinatura{% endblock %}
+
+{% block corpo %}
+<header class="topo vidro">
+  {{ m.marca('/') }}
+  <nav class="menu" aria-label="Menu principal">
+    <a href="#recursos">Recursos</a>
+    <a href="#como-funciona">Como funciona</a>
+    <a href="#planos">Planos</a>
+    <details class="menu-tema">
+      <summary class="btn btn-icone" aria-label="Escolher cores" title="Cores">
+        <svg class="icone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22a10 10 0 1 1 10-10c0 2.8-2.2 4-4 4h-2a2 2 0 0 0-1.5 3.3A1.7 1.7 0 0 1 12 22z"/><circle cx="7.5" cy="11" r="1.2"/><circle cx="11" cy="7" r="1.2"/><circle cx="16" cy="8.5" r="1.2"/></svg>
+      </summary>
+      <form class="menu-tema-painel vidro vidro-forte" data-salvar-ao-escolher>
+        <p class="rotulo">Cores do site</p>
+        {{ m.opcoes_tema() }}
+      </form>
+    </details>
+    {{ m.alternar_modo() }}
+    <a href="{{ url_for('publico.entrar_equipe') }}" class="btn btn-vidro">Sou da equipe</a>
+    <a href="{{ url_for('publico.entrar') }}">Entrar</a>
+    <a href="{{ url_for('publico.cadastro') }}" class="btn btn-primario">Criar meu evento</a>
+  </nav>
+</header>
+
+<main>
+  <!-- Hero -->
+  <section class="hero">
+    <div class="envoltorio hero-grade">
+      <div>
+        <h1 class="hero-titulo">Crie, gerencie, venda e controle seu evento em um só lugar</h1>
+        <p class="hero-texto">Ingressos com QR Code, pulseiras cashless com NFC, loja do evento e relatórios ao vivo para festas, formaturas e eventos pequenos. Você paga uma assinatura mensal e coloca o evento no ar em minutos.</p>
+        <div class="hero-acoes">
+          <a href="{{ url_for('publico.cadastro') }}" class="btn btn-primario btn-g">Criar meu evento</a>
+          <a href="#planos" class="btn btn-vidro btn-g">Ver planos</a>
+        </div>
+        <p class="hero-nota">Trabalha num evento? <a href="{{ url_for('publico.entrar_equipe') }}" class="link">Entre com o código que o organizador te passou</a>.</p>
+      </div>
+
+      <!-- Prévia do modo operador (a tela que a equipe usa no celular) -->
+      <div class="previa vidro" aria-hidden="true">
+        <div class="previa-topo"><strong>Modo operador</strong><span class="tag tag-ok">Ao vivo</span></div>
+        <div class="previa-ok">
+          {{ icone('check') }}
+          <div><strong>Ingresso válido</strong><small>Maria S., lote VIP, entrou às 21:04</small></div>
+        </div>
+        <ul class="previa-lista">
+          <li>{{ icone('qr') }}<strong>Portaria</strong><small>Lê o QR Code</small></li>
+          <li>{{ icone('loja') }}<strong>Ponto de venda</strong><small>Bar, loja e food truck</small></li>
+          <li>{{ icone('caixa') }}<strong>Caixa</strong><small>Recarga de pulseiras</small></li>
+          <li>{{ icone('resumo') }}<strong>Resumo</strong><small>Vendas da noite</small></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Recursos (RF01 a RF09) -->
+  <section class="secao" id="recursos">
+    <div class="envoltorio">
+      <div class="secao-cabeca">
+        <h2>Do primeiro ingresso ao fechamento do caixa</h2>
+        <p>Sem planilha, sem ficha de papel e sem dinheiro circulando no bar.</p>
+      </div>
+      <div class="recursos">
+        <article class="recurso vidro">
+          {{ icone('ingresso') }}
+          <h3>Ingressos com QR Code</h3>
+          <p>Crie lotes como VIP, antecipado e normal. Cada ingresso tem um código único que só entra uma vez.</p>
+        </article>
+        <article class="recurso vidro">
+          {{ icone('pulseira') }}
+          <h3>Pulseiras cashless</h3>
+          <p>O participante recarrega a pulseira no caixa e paga encostando no celular da equipe.</p>
+        </article>
+        <article class="recurso vidro">
+          {{ icone('loja') }}
+          <h3>Loja do evento</h3>
+          <p>Cadastre bebidas, comidas e produtos. O estoque baixa sozinho a cada venda.</p>
+        </article>
+        <article class="recurso vidro">
+          {{ icone('equipe') }}
+          <h3>Equipe com permissões</h3>
+          <p>Cada pessoa vê só o que precisa: portaria, bar, caixa ou resumo de vendas.</p>
+        </article>
+        <article class="recurso vidro">
+          {{ icone('painel') }}
+          <h3>Painel ao vivo</h3>
+          <p>Entradas, vendas por ponto e saldo das pulseiras atualizados durante a festa.</p>
+        </article>
+        <article class="recurso vidro">
+          {{ icone('transacao') }}
+          <h3>Estorno em um clique</h3>
+          <p>Cobrou errado? O valor volta para a pulseira e os produtos voltam para o estoque.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Como funciona: é uma sequência, por isso tem números -->
+  <section class="secao" id="como-funciona">
+    <div class="envoltorio">
+      <div class="secao-cabeca">
+        <h2>Seu evento no ar em três passos</h2>
+      </div>
+      <ol class="passos">
+        <li><h3>Crie sua conta</h3><p>Escolha o plano que cabe no tamanho do seu evento.</p></li>
+        <li><h3>Monte o evento</h3><p>Data, local, lotes de ingresso, produtos e pontos de venda.</p></li>
+        <li><h3>Chame a equipe</h3><p>Crie os acessos e passe o código do evento. Cada um entra pelo celular.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- Planos -->
+  <section class="secao" id="planos">
+    <div class="envoltorio">
+      <div class="secao-cabeca">
+        <h2>Planos de assinatura</h2>
+        <p>Todos os planos têm todos os recursos. O que muda é o tamanho.</p>
+      </div>
+      <div class="planos">
+        {% for p in planos %}
+        {% set destaque = p.codigo == 'profissional' %}
+        <article class="plano vidro {{ 'plano-destaque' if destaque }}">
+          <div class="plano-topo">
+            <h3>{{ p.nome }}</h3>
+            {% if destaque %}<span class="tag tag-destaque">Mais escolhido</span>{% endif %}
+          </div>
+          <div class="plano-preco"><span>{{ p.preco | reais }}</span><small> por mês</small></div>
+          <ul>
+            <li>{{ icone('check') }}<span>
+              {%- if p.max_eventos is none %}Eventos ilimitados{% elif p.max_eventos == 1 %}1 evento{% else %}{{ p.max_eventos }} eventos{% endif -%}
+            </span></li>
+            <li>{{ icone('check') }}<span>
+              {%- if p.max_capacidade is none %}Público ilimitado{% else %}Até {{ p.max_capacidade | numero }} pessoas por evento{% endif -%}
+            </span></li>
+            <li>{{ icone('check') }}<span>
+              {%- if p.max_equipe is none %}Equipe ilimitada{% else %}Até {{ p.max_equipe }} pessoas na equipe{% endif -%}
+            </span></li>
+            <li>{{ icone('check') }}<span>Ingressos, pulseiras, loja e relatórios</span></li>
+          </ul>
+          <a href="{{ url_for('publico.cadastro', plano=p.codigo) }}"
+             class="btn btn-bloco {{ 'btn-primario' if destaque else 'btn-vidro' }}">Assinar o {{ p.nome }}</a>
+        </article>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <!-- Segurança (RNF01, RNF02, RNF04, RNF06) -->
+  <section class="secao">
+    <div class="envoltorio seguranca">
+      <div>{{ icone('cadeado') }}<strong>Senhas protegidas</strong><span>Guardadas com BCrypt, nunca em texto.</span></div>
+      <div>{{ icone('escudo') }}<strong>Antifraude</strong><span>QR Code de uso único e saldo que nunca fica negativo.</span></div>
+      <div>{{ icone('raio') }}<strong>Banco PostgreSQL</strong><span>Toda venda é uma transação: ou grava tudo, ou nada.</span></div>
+      <div>{{ icone('celular') }}<strong>Web e celular</strong><span>Leitura de QR pela câmera e NFC no Android.</span></div>
+    </div>
+  </section>
+
+  <section class="secao">
+    <div class="envoltorio">
+      <div class="chamada vidro">
+        <h2>Pronto para a próxima festa?</h2>
+        <p>Crie a conta, monte o evento e comece a vender hoje.</p>
+        <a href="{{ url_for('publico.cadastro') }}" class="btn btn-primario btn-g">Criar meu evento</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="rodape">
+  <div class="envoltorio">
+    <div>
+      <strong>PartyManager</strong><br>
+      Projeto acadêmico de Bernardo Pinotti Calenzani Simões, Rafael Walger Tovar, Samuel Floriano,
+      Gabriel Leal Hoffoman e Kauã de Freitas.
+    </div>
+    <nav aria-label="Links do rodapé">
+      <a href="{{ url_for('publico.termos') }}">Termos e privacidade</a>
+      <a href="{{ url_for('publico.entrar') }}">Entrar</a>
+      <a href="{{ url_for('publico.entrar_equipe') }}">Acesso da equipe</a>
+    </nav>
+  </div>
+</footer>
+{% endblock %}

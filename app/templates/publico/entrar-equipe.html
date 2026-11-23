@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% import "fragmentos/macros.html" as m with context %}
+{% block titulo %}Acesso da equipe{% endblock %}
+
+{% block corpo %}
+<!-- Login da equipe: não tem cadastro nem "esqueci a senha".
+     Quem cria e redefine o acesso é o organizador do evento. -->
+<main class="pagina-auth">
+  <div class="auth">
+    <div class="vidro">
+      <div class="auth-topo">
+        {{ m.marca('/') }}
+        {{ m.alternar_modo() }}
+      </div>
+
+      <h1>Acesso da equipe</h1>
+      <p class="sub">Use o código do evento e o usuário que o organizador criou para você.</p>
+
+      {% if erro or request.args.saiu or request.args.desativado %}
+      <div class="avisos">
+        {% if erro %}<p class="aviso aviso-erro" role="alert">{{ icone('alerta') }}<span>{{ erro }}</span></p>{% endif %}
+        {% if request.args.desativado %}<p class="aviso aviso-erro" role="alert">{{ icone('alerta') }}<span>Seu acesso foi desativado pelo organizador.</span></p>{% endif %}
+        {% if request.args.saiu %}<p class="aviso aviso-info">{{ icone('info') }}<span>Turno encerrado. Até a próxima!</span></p>{% endif %}
+      </div>
+      {% endif %}
+
+      <form class="form" action="{{ url_for('publico.entrar_equipe_enviar') }}" method="post">
+        {{ m.csrf() }}
+        <div class="campo">
+          <label for="codigo">Código do evento</label>
+          <input type="text" id="codigo" name="codigo" class="cracha-codigo" value="{{ codigo }}"
+                 maxlength="6" autocomplete="off" autocapitalize="characters" spellcheck="false"
+                 placeholder="ABC123" required {% if not codigo %}autofocus{% endif %}>
+        </div>
+        <div class="campos">
+          <div class="campo">
+            <label for="usuario">Usuário</label>
+            <input type="text" id="usuario" name="usuario" autocomplete="username" autocapitalize="none"
+                   spellcheck="false" placeholder="paula" required {% if codigo %}autofocus{% endif %}>
+          </div>
+          <div class="campo">
+            <label for="senha">Senha</label>
+            <div class="campo-senha">
+              <input type="password" id="senha" name="senha" autocomplete="current-password" required>
+              <button type="button" data-ver-senha aria-label="Mostrar senha">
+                <svg class="icone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primario btn-g btn-bloco">Começar turno</button>
+      </form>
+
+      <p class="auth-rodape texto-3 pequeno">Esqueceu a senha? Peça para o organizador redefinir.</p>
+    </div>
+    <p class="auth-troca">É o organizador? <a href="{{ url_for('publico.entrar') }}" class="link">Entre aqui</a></p>
+  </div>
+</main>
+{% endblock %}
