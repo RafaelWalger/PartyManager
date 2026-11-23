@@ -53,36 +53,6 @@ diagrams/         modelo relacional
 executar.py       roda o site no computador
 ```
 
-## Banco de dados
-
-Os scripts ficam em `database/`:
-
-1. `01_criacao_tabelas.sql` cria as tabelas.
-2. `02_dados_exemplo.sql` cria as contas de teste.
-3. `00_apagar_tabelas.sql` apaga tudo, para recomeçar do zero.
-
-Para rodar, abra o projeto no Supabase, vá em SQL Editor e execute o conteúdo de cada arquivo.
-
-O diagrama do modelo relacional está em `diagrams/modelo-relacional.md`.
-
-## Rodar no computador
-
-É preciso ter o Python 3.12 ou mais novo.
-
-```
-python -m venv .venv
-.venv\Scripts\activate
-pip install -r requirements.txt
-```
-
-Copie o arquivo `.env.example` para `.env` e preencha `DATABASE_URL` com o endereço do banco e `SECRET_KEY` com um texto aleatório. Depois execute:
-
-```
-python executar.py
-```
-
-O site abre em http://localhost:8080.
-
 ## Publicação
 
 O site está no Vercel, ligado a este repositório: cada alteração enviada para a branch `main` é publicada automaticamente. O banco foi criado pela integração do Supabase dentro do Vercel, que já cadastra as variáveis de conexão no projeto.
