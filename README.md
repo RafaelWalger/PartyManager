@@ -7,7 +7,7 @@ Projeto acadêmico do curso de Ciência da Computação (FAESA).
 
 **Integrantes:** Bernardo Pinotti Calenzani Simões, Rafael Walger Tovar, Samuel Floriano, Gabriel Leal Hoffoman e Kauã de Freitas.
 
-> **Site no ar:** https://SEU-PROJETO.vercel.app  ← trocar pelo link do Vercel depois de publicar
+> **Site no ar:** https://party-manager-mauve.vercel.app
 >
 > Não precisa instalar nada: é só abrir o link e entrar com as contas de teste abaixo.
 
